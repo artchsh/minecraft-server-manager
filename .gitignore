@@ -165,3 +165,4 @@ test
 build_tools
 servers
 *.jar
+*.db
