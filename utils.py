@@ -47,9 +47,5 @@ def parse_config_versions(core: str):
     config = read_config()
     return config['Cores'][f'{core}_versions'].split(',')
 
-def get_java_memory():
-    config = read_config()
-    return config['Java']['server_allocated_memory']
-
 if __name__ == "__main__":
     download_file("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", "dummy.pdf")

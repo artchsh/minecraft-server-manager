@@ -6,9 +6,9 @@ Working features:
     - Downloading latest version of BuildTools from Jenkins API
     - Checking for last version of BuildTools using Jenkins API
     - Building specified version of spigot
+    - Running newly created server
 
 Not working features:
-- Run commands in console
 - Launch existing servers
 - Stop button should also stop Java process, but it doesn't
 

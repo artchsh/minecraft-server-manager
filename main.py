@@ -18,6 +18,22 @@ def main():
         exit()
     else:
         main()
+        
+def start_existing_minecraft_server():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("Choose a server to start")
+    print("--------------------------------")
+    print("[99] - Back")
+    servers = db.get_all_servers()
+    for i in range(len(servers)):
+        print(f"[{i}] - {servers[i]['name']} ({servers[i]['core']} {servers[i]['version']})")
+    choice = input("Enter your choice -> ")
+    if choice == '99':
+        main()
+    else:
+        server_name = servers[int(choice)]['name']
+        server_core = servers[int(choice)]['core']
+        CORES[server_core]['run'](server_name)
 
 def create_new_minecraft_server():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -28,6 +44,9 @@ def create_new_minecraft_server():
     if minecraft_server_name == '9':
         main()
     else:
+        if db.get_server_by_name(minecraft_server_name):
+            print("Server with this name already exists")
+            create_new_minecraft_server()
         choose_core(minecraft_server_name)
 
 def choose_core(server_name: str):
@@ -39,7 +58,6 @@ def choose_core(server_name: str):
     choice = input("Enter your choice -> ")
     if choice == '0':
         choose_version(server_name, 'spigot')
-
     elif choice == '9':
         create_new_minecraft_server()
     else:
@@ -56,8 +74,7 @@ def choose_version(server_name: str, core: str):
     choice = input("Enter your choice -> ")
     if choice != "99":
         version = core_versions[int(choice)]
-        CORES[core](server_name, version)
-        db.create_new_server_record(server_name, 'spigot', version)
+        CORES[core]['create'](server_name, version)
     else:
         choose_core(server_name)
 

@@ -1,86 +1,73 @@
-import sqlite3
+import json, os
 
-DB = 'msm.db'
+FILE = 'db/msm.json'
 
-def create_tables():
-    connection = sqlite3.connect(DB)
-    cursor = connection.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS servers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            core TEXT,
-            version TEXT,
-            eula TEXT,
-            local_ip TEXT,
-        )
-    ''')
-    connection.commit()
-    connection.close()
+def write_data(data: list[dict]):
+    f = open(FILE, 'w')
+    f.write(json.dumps(data, indent=2))
+    f.close()
 
-def create_new_server_record(server_name: str, core: str, version: str):
-    connection = sqlite3.connect(DB)
-    cursor = connection.cursor()
-    create_tables()
-    cursor.execute('''
-        INSERT INTO servers (name, core, version, eula, local_ip) VALUES (?, ?, ?, ?, ?)
-    ''', (server_name, core, version, 'false', ''))
-    connection.commit()
-    connection.close()
-    
-def get_server_by_name(server_name: str):
-    connection = sqlite3.connect(DB)
-    cursor = connection.cursor()
-    cursor.execute('''
-        SELECT * FROM servers WHERE name = ?
-    ''', (server_name,))
-    data = cursor.fetchone()
-    connection.close()
+def read_data() -> list[dict]:
+    os.system('mkdir db')
+    if not os.path.exists(FILE):
+        f = open(FILE, 'w')
+        f.write(json.dumps([], indent=2))
+        f.close()
+    f = open(FILE, 'r')
+    data = json.loads(f.read())
+    f.close()
     return data
 
-def get_all_servers():
-    connection = sqlite3.connect(DB)
-    cursor = connection.cursor()
-    cursor.execute('''
-        SELECT * FROM servers
-    ''')
-    data = cursor.fetchall()
-    connection.close()
-    return data
-
-def update_server_eula(server_name: str, eula: str):
-    connection = sqlite3.connect(DB)
-    cursor = connection.cursor()
-    cursor.execute('''
-        UPDATE servers SET eula = ? WHERE name = ?
-    ''', (eula, server_name))
-    connection.commit()
-    connection.close()
+def create_new_server_record(server_name: str, core: str, core_build_number: str, version: str):
+    server = {
+        'name': server_name,
+        'core': core,
+        'core_build_number': core_build_number,
+        'version': version,
+        'local_ip': '',
+        'memory': '2048'
+    }
+    data = read_data()
+    data.append(server)
+    write_data(data)
     
+def get_server_by_name(server_name: str) -> dict:
+    data = read_data()
+    for server in data:
+        if server['name'] == server_name:
+            return server
+
+def get_all_servers() -> list[dict]:
+    return read_data()
+
+
 def update_server_local_ip(server_name: str, local_ip: str):
-    connection = sqlite3.connect(DB)
-    cursor = connection.cursor()
-    cursor.execute('''
-        UPDATE servers SET local_ip = ? WHERE name = ?
-    ''', (local_ip, server_name))
-    connection.commit()
-    connection.close()
+    data = read_data()
+    for server in data:
+        if server['name'] == server_name:
+            server['local_ip'] = local_ip
+    write_data(data)
     
 def delete_server(server_name: str):
-    connection = sqlite3.connect(DB)
-    cursor = connection.cursor()
-    cursor.execute('''
-        DELETE FROM servers WHERE name = ?
-    ''', (server_name,))
-    connection.commit()
-    connection.close()
+    data = read_data()
+    for server in data:
+        if server['name'] == server_name:
+            data.remove(server)
+    write_data(data)
     
 def delete_all_servers():
-    connection = sqlite3.connect(DB)
-    cursor = connection.cursor()
-    cursor.execute('''
-        DELETE FROM servers
-    ''')
-    connection.commit()
-    connection.close()
+    write_data([])
 
+def update_server_core_build_number(server_name: str, core_build_number: str):
+    data = read_data()
+    for server in data:
+        if server['name'] == server_name:
+            server['core_build_number'] = core_build_number
+    write_data(data)
+    
+def server_name_exists(server_name: str):
+    data = read_data()
+    for server in data:
+        if server['name'] == server_name:
+            return True
+    return False
