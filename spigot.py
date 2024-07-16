@@ -1,7 +1,6 @@
 import os, requests, db
 from utils import get_java
 from config import read_config
-from main import main
 
 def build_spigot(minecraft_version: str, server_name: str):
     java = get_java()
@@ -29,7 +28,6 @@ def run_spigot(server_name: str, skip_build_step: bool = False):
     if not skip_build_step:
         build_spigot(db.get_server_by_name(server_name)['version'], server_name)
     os.system(f"cd servers/{server_name} && {java} -Xmx{mem}M -Xms512M -jar server.jar nogui")
-    main()
     
 def is_last_version_installed(server_name: str):
     config = read_config()
